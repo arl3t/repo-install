@@ -5,33 +5,37 @@ if [[ $EUID -ne 0 ]]; then
    echo "Este script debe ejecutarse como root" 
    exit 1
 fi
-
+echo "Instalando Complementos"
+# Complementos
+apt update -y
+apt upgrade -y
+apt install build-essential -y
+apt install gcc -y
+apt install unzip -y
+echo "Complementos instalados"
+sleep 2
+clear
 # Instalar Java JDK
 sudo mkdir /usr/lib/jvm/
 sudo tar -zxvf jdk-8u361-linux-x64.tar.gz -C /usr/lib/jvm/
 sudo update-alternatives --install /usr/bin/java java /usr/lib/jvm/jdk1.8.0_361/bin/java 1
 
 java -version
-# 
-echo "Instalacion Java 1.8.0"
-# Esperar un segundo
 sleep 2
-
 # Instalación del entorno en Debian 12
 
-echo "Crear un usuario para Tomcat"
-sleep 1
-
+# Crear un usuario para Tomcat
 useradd -m -U -d /srv/template/tomcat -s /bin/false tomcat
 
-echo "Crear carpeta para Tomcat"
-sleep 1
+# Crear carpeta para Tomcat
 mkdir -p /srv/template/tomcat
 chown tomcat:tomcat /srv/template/tomcat -R
-echo "Descomprimir file.zip y cambiar directorio"
+# Descomprimir file
+echo "descomprimiendo file y accediendo"
 unzip file.zip
 cd file
 sleep 1
+clear
 # Descomprimir Apache Tomcat
 TOMCAT_ARCHIVE="apache-tomcat-9.0.65.tar.gz"
 tar -xf "$TOMCAT_ARCHIVE" -C /srv/template/tomcat --strip-components=1
@@ -86,4 +90,14 @@ chown tomcat:tomcat /srv/template/ -R
 # Reiniciar el servicio
 systemctl daemon-reload
 systemctl start tomcat
-systemctl status tomcat
+clear
+echo "Instalacion del Artefacto APIA"
+sleep 1
+cd /home/repo_apia_cifrado/
+mv Apia.xml /srv/template/tomcat/conf/Catalina/localhost/
+tar -xf statum.tar.gz -C /srv/template/
+clear
+echo "Dar permisos tomcat"
+chown tomcat:tomcat /srv/template/ -R
+systemctl stop tomcat
+systemctl start tomcat; tail -f /srv/template/tomcat/logs/catalina.out
